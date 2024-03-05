@@ -1,5 +1,5 @@
 # aiGuidanceSystem
-# AI-powered Knowledge Retention System (working title)
+#### An AI-powered Knowledge Retention System 
 
 ## Introduction:
 
