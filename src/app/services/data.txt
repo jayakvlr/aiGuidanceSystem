@@ -1,0 +1,29 @@
+Sign up Sign in Sign up Sign in Danil Vityazev Follow Towards Data Science 34 Listen Share Generally, it’s easy to find the nearest road to a given point, but when we’re talking ab
+out millions of points and thousands of roads things may get a bit complicated. I want to tell you how to build a function that does this from scratch, and then speed it up 80 time
+s with Numba. So, in this text, I’m going to solve the following task: Given - 7 million points, each determined by its longitude and latitude- 10 thousand roads in the graph. Road
+s are stored in form of OSMnx graph To do For each road in the graph find out the number of points for which this particular road is the nearest one. What is essentially needed, is
+ to transform the first map to the second one, but with a lot more points and streets. The given task is unfortunately too heavy for standard Shapely functions, so we need to make
+a custom solution. Let’s start with the easiest approach. The distance from the origin of coordinates to a line defined by two points can be calculated with this formula: We can us
+e this formula to calculate the distance from any given point. All that’s needed to do this is to transform the coordinates in the way that the given point ends up in the origin. L
+et’s write a simple function that iterates over all the streets and finds the nearest one. The only problem is that in real life streets are not infinite, and are usually defined b
+y their endpoints. Consider the situation in the picture. While point A is closer to the first segment, the formula above tells us that point A is closer to the second one, because
+ its continuation lies right near the point. To eliminate these streets, let’s introduce a rule, that a perpendicular line, drown from the data point to a street must intersect it
+between its endpoints. Otherwise, a street is considered irrelevant. I’d like to point out that this rule is equivalent to a requirement that the lines drawn from the data point to
+ the streets’ endpoints form acute angles with the street. The second requirement is easier to check. All we need to do is calculate a scalar product of vectors representing sides
+of the triangle. If the angle between two vectors is obtuse the scalar product is negative and vice-versa. Here’s the code that checks if the triangle is acute. I guess you already
+ know the next problem we’ll face. Not all streets are straight in real life. Consider the situation in the picture below The algorithm we just developed returns the first line as
+being the nearest one, while the answer is obviously the second one. This is due to the fact that the current approach considers endpoints only, and doesn’t account for curvature.
+Fortunaltely, the OSMnx graph also contains geometries of the streets, which can be represented in a form of a sequence of coordinates of endpoints of the streets subsegments. Now,
+ all we need to do to resolve this issue is to iterate over all the subsegments for every street considered. This, however, creates one more, rather an unexpected problem. What hap
+pens if the continuation of one of the segments of some distant street lies right near the datapoint? The point will be associated with the street №2 while it clearly belongs to th
+e first one. The problem, however, can be solved by checking the triangle for being acute for every subsegment, just like we already did for streets’ endpoints. That covers all the
+ cases that may cause a problem, so we can proceed to the next part, the efficiency optimization. At this point, the overall algorithm is finished. The only thing we can add to a f
+unction’s logic to speed it up is to check if the street isn’t too far away, and drop the street if it is. After adding a line, that checks if all the endpoints are not farther tha
+n a certain distance the function looks like this: Unfortunately after all the adjustments, it would take approximately a week to calculate the nearest street for every point out o
+f 7 million. We need to go deeper. I’m going to use the Numba library to speed the function up even more. What it does is translate certain Python functions to optimized machine co
+de at runtime using the LLVM compiler library. The only drawback is that it doesn’t support dynamic typing along with some Python-specific datatypes such as Pandas data frames. I d
+eliberately didn’t use not-supported data types, so it won’t be a problem. So all we have to do is to specify data types of the variables that are used in speeded-up functions. For
+ a function to be compelled with Numba the @jit decorator must be placed before it. And that’s all. Now to test the efficiency gain, let’s load a street graph for the London city c
+enter, and generate a thousand points. I tried to find the nearest street for all the points with Numba speed-up and without it. Here are the results: The code works 80 times faster, that’s impressive. The initial task of associating 7 million points to streets has been finished in just a few hours, instead of a week. I made a notebook with all the code and more pictures. You can find it in this repository. Thank you for reading the article, I hope you found it useful! vityazevdanil.medium.com Distraction-free reading. No ads. Organize your knowledge with lists and highlights. Tell your story. Find your audience. Access the best member-only stories. Support independent authors. Listen to audio narrations. Read offline. Join the Partner Program and earn for your writing. 34 34 Towards Data Science PhD candidate, Data Scientist. I make mathematical models of business processes to help people make decisions. vityazevdanil@gmail.com Help Status About Careers Blog Privacy Terms Text to speech Teams
+
+

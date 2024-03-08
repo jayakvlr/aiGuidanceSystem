@@ -1,0 +1,12 @@
+langchain == 0.0.247
+fastapi
+openai
+beautifulsoup4
+python-dotenv
+playwright
+youtube-transcript-api
+matplotlib
+seaborn
+gensim
+nltk
+flasgger
