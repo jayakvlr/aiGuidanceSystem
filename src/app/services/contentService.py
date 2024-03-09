@@ -10,8 +10,6 @@ from scrapeService import ascrape_playwright
 from openai import OpenAI
 import os
 sns.set()
-os.environ['OPENAI_API_KEY'] = "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"
-
 
 def create_qa(context, num=5,perspective = 'data science'):
     # Defining the context for creating the Q&As
